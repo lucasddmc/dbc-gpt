@@ -1,0 +1,17 @@
+.vscode/
+.workspace/
+venv/
+.venv/
+__pycache__/
+*Zone.Identifier
+coverage_html_report/
+.pytest_cache/
+coverage.xml
+.coverage
+junit/
+src/contracts/*.sol
+
+.env
+
+# LLM SPEC results
+llm_spec/results/*

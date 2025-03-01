@@ -1,0 +1,19 @@
+Given:
+
+1. An ERC interface that needs to be annotated with solc-verify postcondition annotations.
+2. An EIP markdown document providing the specification for the ERC interface.
+3. Examples of annotated ERC interfaces.
+
+Instructions:
+
+1. Postconditions Only: Add only /// @notice postcondition annotations. Do not include any other types of annotations.
+2. Function Bodies: Do not include function implementations. Provide only function signatures with the added annotations.
+3. Postconditions Limit: Each function must have at most 4 postcondition annotations. Do not exceed this limit under any circumstances.
+4. Annotation Position: Place the solc-verify annotations immediately above the related function signature, as shown in the examples.
+5. Output Format: Return only the annotated interface inside code fences with solidity syntax highlighting (use ```solidity). Do not include any additional text or explanations.
+
+Guidance for Generating Postconditions:
+
+1. State Changes: Reflect how state variables change after function execution.
+2. Conditions on Inputs: Consider how inputs affect state variables or outputs.
+3. Reset Conditions: Ensure certain variables are reset after function execution, if applicable.
