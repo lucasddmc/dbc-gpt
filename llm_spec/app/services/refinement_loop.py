@@ -16,6 +16,7 @@ def loop(
     initial_prompt: str,
     interaction_counter: int,
     verification_status: List[str],
+    requested_type: str = "erc20",
     max_iterations: int = 10
 ) -> Optional[str]:
     interaction_counter += 1
@@ -36,46 +37,50 @@ def loop(
         print("No Solidity code found, generating reinforcement message.")
         response += "\n\nNo Solidity code found. Please try again.\n\n"
         reinforcement_message = prepare_reinforcement_message(response, initial_prompt)
-        return loop(llm_service, verifier_service, reinforcement_message, initial_prompt, interaction_counter, verification_status, max_iterations)
+        return loop(llm_service, verifier_service, reinforcement_message, initial_prompt, interaction_counter, verification_status, requested_type, max_iterations)
 
     try:
         print("SENDING TO VERIFY")
+        # Use the appropriate template path based on requested_type
+        template_path = f'app/templates/{requested_type.upper()}/templates/imp_spec_merge.template'
+        merge_path = f'app/templates/{requested_type.upper()}/imp/{requested_type.upper()}_merge.template'
+        
         status, output = verifier_service.verify(
             solidity_code,
-            'app/templates/imp_spec_merge.template',
-            'temp/merged_contract.sol'
+            template_path,
+            merge_path
         )
     except ValueError as e:
         print("Format incorrect, refining prompt and retrying")
         verification_status.append(f'Iteration {interaction_counter}:\n{str(e)}\n')
         response += "\n\nIncorrect format. Please try again.\n\n"
         reinforcement_message = prepare_reinforcement_message(solidity_code, initial_prompt)
-        return loop(llm_service, verifier_service, reinforcement_message, initial_prompt, interaction_counter, verification_status, max_iterations)
+        return loop(llm_service, verifier_service, reinforcement_message, initial_prompt, interaction_counter, verification_status, requested_type, max_iterations)
 
     except SyntaxError as e:
         print("No annotations, state variables and functions found, refining prompt and retrying.")
         verification_status.append(f'Iteration {interaction_counter}:\n{str(e)}\n')
         response += "\n\nNo annotations, state variables and functions found in the contract. Please try again.\n\n"
         reinforcement_message = prepare_reinforcement_message(solidity_code, initial_prompt)
-        return loop(llm_service, verifier_service, reinforcement_message, initial_prompt, interaction_counter, verification_status, max_iterations)
+        return loop(llm_service, verifier_service, reinforcement_message, initial_prompt, interaction_counter, verification_status, requested_type, max_iterations)
 
     except RuntimeError as e:
         print("Runtime error, refining prompt and retrying.")
         verification_status.append(f'Iteration {interaction_counter}:\n{str(e)}\n')
         response += "\n\nSomething has gone wrong compiling the solidity code. Please try again.\n\n"
         reinforcement_message = prepare_reinforcement_message(solidity_code, initial_prompt)
-        return loop(llm_service, verifier_service, reinforcement_message, initial_prompt, interaction_counter, verification_status, max_iterations)
+        return loop(llm_service, verifier_service, reinforcement_message, initial_prompt, interaction_counter, verification_status, requested_type, max_iterations)
 
     except Exception as e:
         logger.error(f"Verification error: {e}")
         reinforcement_message = prepare_reinforcement_message(solidity_code, initial_prompt)
-        return loop(llm_service, verifier_service, reinforcement_message, initial_prompt, interaction_counter, verification_status, max_iterations)
+        return loop(llm_service, verifier_service, reinforcement_message, initial_prompt, interaction_counter, verification_status, requested_type, max_iterations)
         
     if status != 0:
         print("Verification failed, refining prompt and retrying.")
         verification_status.append(f'Iteration {interaction_counter}:\n{output}\n')
         reinforcement_message = prepare_reinforcement_message(solidity_code, initial_prompt)
-        return loop(llm_service, verifier_service, reinforcement_message, initial_prompt, interaction_counter, verification_status, max_iterations)
+        return loop(llm_service, verifier_service, reinforcement_message, initial_prompt, interaction_counter, verification_status, requested_type, max_iterations)
     else:
         print("Verification successful.")
         return solidity_code
@@ -112,7 +117,8 @@ def run_verification_process(
     prompt: str,
     llm_model: str,
     verifier_option: str,
-    task_id: str
+    task_id: str,
+    requested_type: str = "erc20"
 ): 
     """
     Run the verification process 10 times in a row, saving results of each run.
@@ -131,7 +137,15 @@ def run_verification_process(
 
         # Perform the verification loop
         initial_prompt = prompt
-        result = loop(llm_service, verifier_service, prompt, initial_prompt, interaction_counter, verification_status)
+        result = loop(
+            llm_service, 
+            verifier_service, 
+            prompt, 
+            initial_prompt, 
+            interaction_counter, 
+            verification_status, 
+            requested_type
+        )
 
         end_time = time.time()
         duration = end_time - start_time
@@ -148,12 +162,12 @@ def run_verification_process(
         }
         all_results.append(run_result)
 
-        # Optionally, you can save each run's contract or errors to a file
+        # Save each run's contract or errors to a file with the requested_type included in the filename
         if annotated_contract:
-            Utils.save_string_to_file(f"results/{task_id}_spec_run_{run_index+1}.sol", annotated_contract)
+            Utils.save_string_to_file(f"results/{task_id}_{requested_type}_spec_run_{run_index+1}.sol", annotated_contract)
         else:
-            Utils.save_string_to_file(f"results/{task_id}_errors_run_{run_index+1}.txt", "\n".join(verification_status))
+            Utils.save_string_to_file(f"results/{task_id}_{requested_type}_errors_run_{run_index+1}.txt", "\n".join(verification_status))
     
     # After all runs, save the aggregated results into one CSV
-    Utils.save_results_to_csv(f"results/{task_id}_results.csv", all_results)
+    Utils.save_results_to_csv(f"results/{task_id}_{requested_type}_results.csv", all_results)
     print("All 10 experiments completed.")
