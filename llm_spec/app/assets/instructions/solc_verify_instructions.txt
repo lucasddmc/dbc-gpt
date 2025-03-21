@@ -1,19 +1,23 @@
-Given:
+Task:
+- You are given a smart contract interface and need to add formal verification conditions for each function.
+- Read the ERC documentation to understand the contract's behavior.
+- For each function, add postconditions by replacing "$ADD POSTCONDITION HERE" with one or more appropriate postconditions.
+- Use the solc-verify syntax: /// @notice postcondition [condition]
 
-1. An ERC interface that needs to be annotated with solc-verify postcondition annotations.
-2. An EIP markdown document providing the specification for the ERC interface.
-3. Examples of annotated ERC interfaces.
+Requirements:
+- Each function must have appropriate postconditions
+- Conditions must correctly represent the expected behavior per the ERC standard
+- Conditions for all functions must be consistent with each other
+- Annotate with postconditions above each function
 
-Instructions:
+Verification Guidelines:
+- Use ONLY state variables exactly as declared in the contract (_balances, _allowed, _totalSupply)
+- Use ONLY parameter names exactly as they appear in function signatures (_to, _from, _value, etc.)
+- DO NOT create short variable names like 'bal', 't', 's', 'u', 'v', or 'rem'
+- For referencing previous state values, use __verifier_old_uint(stateVariable)
+- For functions that return success, handle both success and failure cases: (condition && success) || !success
+- For self-transfers, add special handling when sender == recipient
+- View functions should relate return values directly to state variables
+- Ensure consistency between related functions (e.g., transfer and transferFrom)
 
-1. Postconditions Only: Add only /// @notice postcondition annotations. Do not include any other types of annotations.
-2. Function Bodies: Do not include function implementations. Provide only function signatures with the added annotations.
-3. Postconditions Limit: Each function must have at most 4 postcondition annotations. Do not exceed this limit under any circumstances.
-4. Annotation Position: Place the solc-verify annotations immediately above the related function signature, as shown in the examples.
-5. Output Format: Return only the annotated interface inside code fences with solidity syntax highlighting (use ```solidity). Do not include any additional text or explanations.
-
-Guidance for Generating Postconditions:
-
-1. State Changes: Reflect how state variables change after function execution.
-2. Conditions on Inputs: Consider how inputs affect state variables or outputs.
-3. Reset Conditions: Ensure certain variables are reset after function execution, if applicable.
+Your task is to annotate this contract with proper solc-verify postconditions:
