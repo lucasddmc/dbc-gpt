@@ -10,7 +10,7 @@ class LLMFactory:
         if model_option.lower() == "openai":
             return OpenAIService(model_name="gpt-4o")
         elif model_option.lower() == "llama":
-            return LlamaService(model_name="gabrielnogueiralt/llama-3.1-8B-transformers-single")
+            return LlamaService()
         # elif model_option.lower() == "claude":
         #     return ClaudeService()
         else:
