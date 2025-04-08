@@ -102,7 +102,7 @@ class LlamaService(LLMServiceInterface):
             #     messages=[{'role': 'user', 'content': prompt}]
             # )
 
-            response: ChatResponse = chat(model='llama3.2-4k', messages=[
+            response: ChatResponse = chat(model=self.model_name, messages=[
                 {
                     'role': 'user',
                     'content': prompt,
