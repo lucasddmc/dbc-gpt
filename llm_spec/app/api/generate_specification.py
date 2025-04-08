@@ -54,7 +54,7 @@ async def generate_specification(
     
     task_id = str(uuid4())
     
-    strcontext = "".join(valid_context_types)
+    str_context = "_".join(valid_context_types)
 
     background_tasks.add_task(
         run_verification_process,
