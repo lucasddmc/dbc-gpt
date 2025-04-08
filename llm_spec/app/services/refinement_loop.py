@@ -118,7 +118,8 @@ def run_verification_process(
     llm_model: str,
     verifier_option: str,
     task_id: str,
-    requested_type: str = "erc20"
+    requested_type: str = "erc20",
+    str_context: str = "erc20"
 ): 
     """
     Run the verification process 10 times in a row, saving results of each run.
@@ -164,10 +165,13 @@ def run_verification_process(
 
         # Save each run's contract or errors to a file with the requested_type included in the filename
         if annotated_contract:
-            Utils.save_string_to_file(f"results/{task_id}_{requested_type}_spec_run_{run_index+1}.sol", annotated_contract)
+            Utils.save_string_to_file(f"results/{requested_type}{str_context}_spec_run{run_index+1}.sol", annotated_contract)
         else:
-            Utils.save_string_to_file(f"results/{task_id}_{requested_type}_errors_run_{run_index+1}.txt", "\n".join(verification_status))
-    
+            Utils.save_string_to_file(f"results/{requested_type}{str_context}_errors_run{run_index+1}.txt", "\n".join(verification_status))
+
+        #! Save into the csv as the loop goes
+        Utils.save_results_to_csv(f"results/{requested_type}_{str_context}_results.csv", all_results)
+
     # After all runs, save the aggregated results into one CSV
-    Utils.save_results_to_csv(f"results/{task_id}_{requested_type}_results.csv", all_results)
+    Utils.save_results_to_csv(f"results/{requested_type}_{str_context}_results.csv", all_results)
     print("All 10 experiments completed.")

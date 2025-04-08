@@ -43,8 +43,8 @@ async def generate_specification(
             logger.warning(f"Ignoring unsupported context type: {ctx_type}")
     
     # Always include the requested type in the context if it's not already there
-    if requested_type not in valid_context_types:
-        valid_context_types.append(requested_type)
+    # if requested_type not in valid_context_types:
+    #     valid_context_types.append(requested_type)
 
     prompt = Utils.build_initial_prompt(
         requested_type=requested_type,
@@ -54,13 +54,16 @@ async def generate_specification(
     
     task_id = str(uuid4())
     
+    strcontext = "".join(valid_context_types)
+
     background_tasks.add_task(
         run_verification_process,
         prompt=prompt,
         llm_model=llm_model,
         verifier_option=verifier,
         task_id=task_id,
-        requested_type=requested_type  # Pass the requested_type to run_verification_process
+        requested_type=requested_type,
+        str_context=str_context # Pass the requested_type to run_verification_process
     )
 
     return {
