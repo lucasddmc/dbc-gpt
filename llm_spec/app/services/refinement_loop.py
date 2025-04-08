@@ -26,6 +26,7 @@ def loop(
     
     print(f"Interaction {interaction_counter}: Sending message to assistant.")
     
+    time.sleep(5)
     response = llm_service.send_message(prompt)
     solidity_code = Utils.extract_solidity_code(response)
     

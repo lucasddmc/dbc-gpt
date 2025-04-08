@@ -17,7 +17,7 @@ async def generate_specification(
     context_types: List[str] = Body(default=[]),
     background_tasks: BackgroundTasks = None
 ):
-    supported_llm_models = ["openai", "llama", "claude"]
+    supported_llm_models = ["openai", "llama", "claude", "gemini", "ollama"]
     supported_verifiers = ["solc_verify", "smtchecker"]
     supported_erc_standards = ["erc20", "erc721", "erc1155"]
 
