@@ -85,7 +85,7 @@ class LlamaService(LLMServiceInterface):
     LlamaService now wraps a local Ollama model instead of using Hugging Face.
     Make sure the model is pulled via `ollama pull <model>` and running locally.
     """
-    def __init__(self, model_name: str = "qwen2.5-coder-4k"):
+    def __init__(self, model_name: str = "deep"):
         print("init")
         self.model_name = model_name
         logger.info(f"Using local Ollama model: {self.model_name}")
